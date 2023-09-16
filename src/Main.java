@@ -101,12 +101,12 @@ public class Main {
 
         // Maak een nieuwe Reiziger aan om te testen met findByReiziger
         String gbdatum = "1981-03-14";
-        Reiziger testReiziger = new Reiziger(334, "T", "van", "Tester", java.sql.Date.valueOf(gbdatum));
+        Reiziger testReiziger = new Reiziger(6, "T", "van", "Tester", java.sql.Date.valueOf(gbdatum));
         reizigerDAO.voegReizigerToe(testReiziger);
 
 
         // Maak een nieuw adres aan en persisteer deze in de database
-        Adres nieuwAdres = new Adres(163, "12345", "123", "Teststraat", "Teststad", 334);
+        Adres nieuwAdres = new Adres(6, "12345", "123", "Teststraat", "Teststad", 6);
         System.out.print("[Test] Eerst " + adressen.size() + " adressen, na AdresDAO.save() ");
         adresDAO.save(nieuwAdres);
         adressen = adresDAO.findAll();
