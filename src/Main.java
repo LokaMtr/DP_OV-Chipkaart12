@@ -35,6 +35,8 @@ public class Main {
         AdresDAO adao = new AdresDAOPsql(connection);
         testAdresDAO(adao, reizigerDAO);
 
+        printReizigersEnAdressen(connection);
+
         resultSet.close();
         preparedStatement.close();
         connection.close();
@@ -88,6 +90,7 @@ public class Main {
     private static void testAdresDAO(AdresDAO adresDAO, ReizigerDAO reizigerDAO) throws SQLException {
         System.out.println("\n---------- Test AdresDAO -------------");
 
+
         // Haal alle adressen op uit de database
         List<Adres> adressen = adresDAO.findAll();
         System.out.println("[Test] AdresDAO.findAll() geeft de volgende adressen:");
@@ -115,21 +118,6 @@ public class Main {
         adresDAO.update(nieuwAdres);
         Adres gewijzigdAdres = adresDAO.findById(nieuwAdres.getAdres_id());
         System.out.println("Na update: " + gewijzigdAdres);
-//
-//        // Test deleteAdres
-//        System.out.println("\n[Test] Test deleteAdres:");
-//        adresDAO.delete(nieuwAdres);
-//        adressen = adresDAO.findAll();
-//        System.out.println("Na verwijderen van adres: " + adressen.size() + " adressen");
-
-//        // Maak een nieuwe Reiziger aan om te testen met findByReiziger
-//        String gbdatum = "1981-03-14";
-//        Reiziger testReiziger = new Reiziger(100, "T", "van", "Tester", java.sql.Date.valueOf(gbdatum));
-//        reizigerDAO.voegReizigerToe(testReiziger);
-//
-//        // Voeg een nieuw adres toe en koppel het aan de testReiziger
-//        Adres testAdres2 = new Adres(93, "54321", "456", "Teststraat 2", "Teststad 2", 93);
-//        adresDAO.save(testAdres2);
 
         // Test findByReiziger
         System.out.println("\n[Test] Test findByReiziger:");
@@ -142,17 +130,44 @@ public class Main {
         // Test deleteAdres
         System.out.println("\n[Test] Test deleteAdres:");
         for (Adres adres : adressenVanReiziger) {
-            adresDAO.delete(adres); // Verwijder de adressen van de reiziger
+            adresDAO.delete(adres);
         }
-        adresDAO.delete(nieuwAdres); // Verwijder het nieuwe adres
+        adresDAO.delete(nieuwAdres);
         adressen = adresDAO.findAll();
         System.out.println("Na verwijderen van adres: " + adressen.size() + " adressen");
 
 
-        // Verwijder de testReiziger om de database schoon te maken
+        // Verwijder de testReiziger om de database normaal te maken
         reizigerDAO.verwijderReiziger(testReiziger.getReizigerId());
+        System.out.println("\nReizigers plus adres: ");
     }
 
+
+    private static void printReizigersEnAdressen(Connection connection) throws SQLException {
+        String query = "SELECT r.reiziger_id, r.voorletters, r.tussenvoegsel, r.achternaam, r.geboortedatum, a.adres_id, a.postcode, a.huisnummer " +
+                "FROM reiziger r " +
+                "LEFT JOIN adres a ON r.reiziger_id = a.reiziger_id";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        while (resultSet.next()) {
+            int reizigerId = resultSet.getInt("reiziger_id");
+            String voorletters = resultSet.getString("voorletters");
+            String tussenvoegsel = resultSet.getString("tussenvoegsel");
+            String achternaam = resultSet.getString("achternaam");
+            String geboortedatum = resultSet.getString("geboortedatum");
+
+            int adresId = resultSet.getInt("adres_id");
+            String postcode = resultSet.getString("postcode");
+            String huisnummer = resultSet.getString("huisnummer");
+
+            System.out.println("Reiziger {#" + reizigerId + " " + formatName(voorletters, tussenvoegsel, achternaam) + ", geb. " + geboortedatum + ", Adres {#" + adresId + " " + postcode + "-" + huisnummer + "}}");
+        }
+
+        resultSet.close();
+        preparedStatement.close();
+    }
 
 
 }
