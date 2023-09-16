@@ -104,6 +104,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
         }
     }
 
+
     @Override
     public void verwijderReiziger(int reizigerId) {
         try {

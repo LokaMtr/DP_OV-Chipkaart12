@@ -7,6 +7,16 @@ public class Reiziger {
     private String achternaam;
     private Date geboortedatum;
 
+    private Adres adres;
+
+    public Adres getAdres() {
+        return adres;
+    }
+
+    public void setAdres(Adres adres) {
+        this.adres = adres;
+    }
+
     // Constructor
     public Reiziger(int reizigerId, String voorletters, String tussenvoegsel, String achternaam, Date geboortedatum) {
         this.reizigerId = reizigerId;
