@@ -39,6 +39,7 @@ public class Main {
         testOVChipkaartDAO(odao, reizigerDAO);
 
 //        printReizigersEnAdressen(connection);
+        printReizigersAdressenEnOVChipkaarten(connection);
 
         resultSet.close();
         preparedStatement.close();
@@ -189,9 +190,8 @@ public class Main {
         Reiziger reiziger = new Reiziger(88, "S", "", "Boers", java.sql.Date.valueOf(gbdatum));
         rdao.voegReizigerToe(reiziger);
 
-        int reizigerId = 88; // Bijvoorbeeld
         // Maak een nieuwe OVChipkaart aan en persisteer deze in de database
-        OVChipkaart ovChipkaart = new OVChipkaart(12345, new Date(System.currentTimeMillis()), 2, 25.0, reizigerId);
+        OVChipkaart ovChipkaart = new OVChipkaart(12345, new Date(System.currentTimeMillis()), 2, 25.0, 88);
         System.out.print("[Test] Eerst " + ovChipkaarten.size() + " OVChipkaarten, na OVChipkaartDAO.save() ");
         odao.save(ovChipkaart);
         ovChipkaarten = odao.getAllOVChipkaarten();
@@ -212,6 +212,53 @@ public class Main {
 
         // Verwijder de testreiziger om de database normaal te maken
         rdao.verwijderReiziger(reiziger.getReizigerId1());
+    }
+    private static void printReizigersAdressenEnOVChipkaarten(Connection connection) throws SQLException {
+        String query = "SELECT r.reiziger_id, r.voorletters, r.tussenvoegsel, r.achternaam, r.geboortedatum, " +
+                "a.adres_id, a.postcode, a.huisnummer, " +
+                "o.kaart_nummer, o.geldig_tot, o.klasse, o.saldo " +
+                "FROM reiziger r " +
+                "LEFT JOIN adres a ON r.reiziger_id = a.reiziger_id " +
+                "LEFT JOIN ov_chipkaart o ON r.reiziger_id = o.reiziger_id";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        System.out.println("\nReizigersAdressenEnOVChipkaarten: \n");
+
+        while (resultSet.next()) {
+            int reizigerId = resultSet.getInt("reiziger_id");
+            String voorletters = resultSet.getString("voorletters");
+            String tussenvoegsel = resultSet.getString("tussenvoegsel");
+            String achternaam = resultSet.getString("achternaam");
+            String geboortedatum = resultSet.getString("geboortedatum");
+
+            int adresId = resultSet.getInt("adres_id");
+            String postcode = resultSet.getString("postcode");
+            String huisnummer = resultSet.getString("huisnummer");
+
+            int kaartNummer = resultSet.getInt("kaart_nummer");
+            Date geldigTot = resultSet.getDate("geldig_tot");
+            int klasse = resultSet.getInt("klasse");
+            double saldo = resultSet.getDouble("saldo");
+
+            System.out.println("Reiziger {#" + reizigerId + " " + formatName(voorletters, tussenvoegsel, achternaam) +
+                    ", geb. " + geboortedatum + "}");
+
+            if (adresId != 0) {
+                System.out.println("Adres {#" + adresId + " " + postcode + "-" + huisnummer + "}");
+            }
+
+            if (kaartNummer != 0) {
+                System.out.println("OVChipkaart {#" + kaartNummer + ", geldig tot " + geldigTot +
+                        ", klasse " + klasse + ", saldo " + saldo + "}");
+            }
+
+            System.out.println();
+        }
+
+        resultSet.close();
+        preparedStatement.close();
     }
 
 
