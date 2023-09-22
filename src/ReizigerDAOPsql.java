@@ -16,7 +16,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             String query = "INSERT INTO reiziger (reiziger_id, voorletters, tussenvoegsel, achternaam, geboortedatum) " +
                     "VALUES (?, ?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, reiziger.getReizigerId());
+            preparedStatement.setInt(1, reiziger.getReizigerId1());
             preparedStatement.setString(2, reiziger.getVoorletters());
             preparedStatement.setString(3, reiziger.getTussenvoegsel());
             preparedStatement.setString(4, reiziger.getAchternaam());
@@ -95,7 +95,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             preparedStatement.setString(2, reiziger.getTussenvoegsel());
             preparedStatement.setString(3, reiziger.getAchternaam());
             preparedStatement.setDate(4, reiziger.getGeboortedatum());
-            preparedStatement.setInt(5, reiziger.getReizigerId());
+            preparedStatement.setInt(5, reiziger.getReizigerId1());
 
             preparedStatement.executeUpdate();
             preparedStatement.close();

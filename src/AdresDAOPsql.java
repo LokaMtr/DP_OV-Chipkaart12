@@ -110,7 +110,7 @@ public class AdresDAOPsql implements AdresDAO {
             String query = "SELECT adres_id, postcode, huisnummer, straat, woonplaats FROM adres " +
                     "WHERE reiziger_id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, reiziger.getReizigerId());
+            preparedStatement.setInt(1, reiziger.getReizigerId1());
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -121,7 +121,7 @@ public class AdresDAOPsql implements AdresDAO {
                 String woonplaats = resultSet.getString("woonplaats");
 
                 // Geen reiziger_id nodig hier, omdat deze niet in de tabel zit
-                Adres adres = new Adres(adresId, postcode, huisnummer, straat, woonplaats, reiziger.getReizigerId());
+                Adres adres = new Adres(adresId, postcode, huisnummer, straat, woonplaats, reiziger.getReizigerId1());
                 adressen.add(adres);
             }
 

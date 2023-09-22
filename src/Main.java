@@ -35,7 +35,10 @@ public class Main {
         AdresDAO adao = new AdresDAOPsql(connection);
         testAdresDAO(adao, reizigerDAO);
 
-        printReizigersEnAdressen(connection);
+        OVChipkaartDAO odao = new OVChipkaartDAOPsql(connection);
+        testOVChipkaartDAO(odao, reizigerDAO);
+
+//        printReizigersEnAdressen(connection);
 
         resultSet.close();
         preparedStatement.close();
@@ -138,36 +141,79 @@ public class Main {
 
 
         // Verwijder de testReiziger om de database normaal te maken
-        reizigerDAO.verwijderReiziger(testReiziger.getReizigerId());
-        System.out.println("\nReizigers plus adres: ");
+        reizigerDAO.verwijderReiziger(testReiziger.getReizigerId1());
+//        System.out.println("\nReizigers plus adres: ");
     }
 
 
-    private static void printReizigersEnAdressen(Connection connection) throws SQLException {
-        String query = "SELECT r.reiziger_id, r.voorletters, r.tussenvoegsel, r.achternaam, r.geboortedatum, a.adres_id, a.postcode, a.huisnummer " +
-                "FROM reiziger r " +
-                "LEFT JOIN adres a ON r.reiziger_id = a.reiziger_id";
+//    private static void printReizigersEnAdressen(Connection connection) throws SQLException {
+//        String query = "SELECT r.reiziger_id, r.voorletters, r.tussenvoegsel, r.achternaam, r.geboortedatum, a.adres_id, a.postcode, a.huisnummer " +
+//                "FROM reiziger r " +
+//                "LEFT JOIN adres a ON r.reiziger_id = a.reiziger_id";
+//
+//        PreparedStatement preparedStatement = connection.prepareStatement(query);
+//        ResultSet resultSet = preparedStatement.executeQuery();
+//
+//        while (resultSet.next()) {
+//            int reizigerId = resultSet.getInt("reiziger_id");
+//            String voorletters = resultSet.getString("voorletters");
+//            String tussenvoegsel = resultSet.getString("tussenvoegsel");
+//            String achternaam = resultSet.getString("achternaam");
+//            String geboortedatum = resultSet.getString("geboortedatum");
+//
+//            int adresId = resultSet.getInt("adres_id");
+//            String postcode = resultSet.getString("postcode");
+//            String huisnummer = resultSet.getString("huisnummer");
+//
+//            System.out.println("Reiziger {#" + reizigerId + " " + formatName(voorletters, tussenvoegsel, achternaam) + ", geb. " + geboortedatum + ", Adres {#" + adresId + " " + postcode + "-" + huisnummer + "}}");
+//        }
+//
+//        resultSet.close();
+//        preparedStatement.close();
+//    }
+//
+    // Test alle CRUD-operaties voor OVChipkaart
+    private static void testOVChipkaartDAO(OVChipkaartDAO odao, ReizigerDAO rdao) throws SQLException {
+        System.out.println("\n---------- Test OVChipkaartDAO -------------");
 
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        while (resultSet.next()) {
-            int reizigerId = resultSet.getInt("reiziger_id");
-            String voorletters = resultSet.getString("voorletters");
-            String tussenvoegsel = resultSet.getString("tussenvoegsel");
-            String achternaam = resultSet.getString("achternaam");
-            String geboortedatum = resultSet.getString("geboortedatum");
-
-            int adresId = resultSet.getInt("adres_id");
-            String postcode = resultSet.getString("postcode");
-            String huisnummer = resultSet.getString("huisnummer");
-
-            System.out.println("Reiziger {#" + reizigerId + " " + formatName(voorletters, tussenvoegsel, achternaam) + ", geb. " + geboortedatum + ", Adres {#" + adresId + " " + postcode + "-" + huisnummer + "}}");
+        // Haal alle OVChipkaarten op uit de database
+        List<OVChipkaart> ovChipkaarten = odao.getAllOVChipkaarten();
+        System.out.println("[Test] OVChipkaartDAO.findAll() geeft de volgende OVChipkaarten:");
+        for (OVChipkaart ov : ovChipkaarten) {
+            System.out.println(ov);
         }
+        System.out.println();
 
-        resultSet.close();
-        preparedStatement.close();
+        // Maak een nieuwe reiziger aan en persisteer deze in de database
+        String gbdatum = "1981-03-14";
+        Reiziger reiziger = new Reiziger(88, "S", "", "Boers", java.sql.Date.valueOf(gbdatum));
+        rdao.voegReizigerToe(reiziger);
+
+        int reizigerId = 88; // Bijvoorbeeld
+        // Maak een nieuwe OVChipkaart aan en persisteer deze in de database
+        OVChipkaart ovChipkaart = new OVChipkaart(12345, new Date(System.currentTimeMillis()), 2, 25.0, reizigerId);
+        System.out.print("[Test] Eerst " + ovChipkaarten.size() + " OVChipkaarten, na OVChipkaartDAO.save() ");
+        odao.save(ovChipkaart);
+        ovChipkaarten = odao.getAllOVChipkaarten();
+        System.out.println(ovChipkaarten.size() + " OVChipkaarten\n");
+
+        // Test updateOVChipkaart
+        System.out.println("[Test] Test updateOVChipkaart:");
+        ovChipkaart.setKlasse(1);
+        odao.update(ovChipkaart);
+        OVChipkaart gewijzigdeOVChipkaart = odao.getOVChipkaartByKaartnummer(ovChipkaart.getKaartnummer());
+        System.out.println("Na update: " + gewijzigdeOVChipkaart);
+
+        // Test verwijderOVChipkaart
+        System.out.println("\n[Test] Test verwijderOVChipkaart:");
+        odao.delete(ovChipkaart);
+        ovChipkaarten = odao.getAllOVChipkaarten();
+        System.out.println("Na verwijderen van OVChipkaart: " + ovChipkaarten.size() + " OVChipkaarten");
+
+        // Verwijder de testreiziger om de database normaal te maken
+        rdao.verwijderReiziger(reiziger.getReizigerId1());
     }
+
 
 
 }

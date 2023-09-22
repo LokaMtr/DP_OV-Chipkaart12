@@ -27,7 +27,7 @@ public class Reiziger {
     }
 
     // Getter-methoden voor de attributen
-    public int getReizigerId() {
+    public int getReizigerId1() {
         return reizigerId;
     }
 

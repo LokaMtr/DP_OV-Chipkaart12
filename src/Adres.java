@@ -67,7 +67,7 @@ public class Adres {
                 .append(", ").append(woonplaats);
 
         if (reiziger != null) {
-            builder.append(", ").append("Reiziger {#").append(reiziger.getReizigerId()).append("}");
+            builder.append(", ").append("Reiziger {#").append(reiziger.getReizigerId1()).append("}");
         }
 
         builder.append("}");
