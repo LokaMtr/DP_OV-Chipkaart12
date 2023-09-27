@@ -60,9 +60,21 @@ public class OVChipkaart {
     }
 
     // toString()-methode voor een nette weergave van een OVChipkaart-object
+//    @Override
+    public String oldtoString() {
+        return "OVChipkaart #" + kaartnummer + " (Geldig tot: " + geldigTot + ", Klasse: " + klasse + ", Saldo: " + saldo + ")";
+    }
+
     @Override
     public String toString() {
-        return "OVChipkaart #" + kaartnummer + " (Geldig tot: " + geldigTot + ", Klasse: " + klasse + ", Saldo: " + saldo + ")";
+        return "OVChipkaart{" +
+                "kaartnummer=" + kaartnummer +
+                ", geldigTot=" + geldigTot +
+                ", klasse=" + klasse +
+                ", saldo=" + saldo +
+                ", reiziger=" + reiziger +
+                ", reizigerId=" + reizigerId +
+                '}';
     }
 
     public int getKaartNummer() {
@@ -76,4 +88,26 @@ public class OVChipkaart {
     public void setReizigerId(int reizigerId) {
         this.reizigerId = reizigerId;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

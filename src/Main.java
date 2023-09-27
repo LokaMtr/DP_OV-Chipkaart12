@@ -39,7 +39,7 @@ public class Main {
         testOVChipkaartDAO(odao, reizigerDAO);
 
 //        printReizigersEnAdressen(connection);
-        printReizigersAdressenEnOVChipkaarten(connection);
+        printReizigersAdressenEnOVChipkaarten(reizigerDAO, adao, odao);
 
         resultSet.close();
         preparedStatement.close();
@@ -174,16 +174,54 @@ public class Main {
 //    }
 //
     // Test alle CRUD-operaties voor OVChipkaart
-    private static void testOVChipkaartDAO(OVChipkaartDAO odao, ReizigerDAO rdao) throws SQLException {
-        System.out.println("\n---------- Test OVChipkaartDAO -------------");
+private static void testOVChipkaartDAO(OVChipkaartDAO odao, ReizigerDAO rdao) throws SQLException {
+    System.out.println("\n---------- Test OVChipkaartDAO -------------");
 
-        // Haal alle OVChipkaarten op uit de database
-        List<OVChipkaart> ovChipkaarten = odao.getAllOVChipkaarten();
-        System.out.println("[Test] OVChipkaartDAO.findAll() geeft de volgende OVChipkaarten:");
-        for (OVChipkaart ov : ovChipkaarten) {
-            System.out.println(ov);
-        }
-        System.out.println();
+    // Haal alle OVChipkaarten op uit de database
+    List<OVChipkaart> ovChipkaarten = odao.getAllOVChipkaarten();
+    System.out.println("[Test] OVChipkaartDAO.findAll() geeft de volgende OVChipkaarten:");
+    for (OVChipkaart ov : ovChipkaarten) {
+        System.out.println(ov);
+    }
+    System.out.println();
+
+    // Maak een nieuwe reiziger aan en persisteer deze in de database
+    String gbdatum = "1981-03-14";
+    Reiziger reiziger = new Reiziger(88, "S", "", "Boers", java.sql.Date.valueOf(gbdatum));
+    rdao.voegReizigerToe(reiziger);
+
+    // Maak een nieuwe OVChipkaart aan en persisteer deze in de database
+    OVChipkaart ovChipkaart = new OVChipkaart(12345, new Date(System.currentTimeMillis()), 2, 25.0, reiziger.getReizigerId());
+    System.out.print("[Test] Eerst " + ovChipkaarten.size() + " OVChipkaarten, na OVChipkaartDAO.save() ");
+    odao.save(ovChipkaart);
+    ovChipkaarten = odao.getAllOVChipkaarten();
+    System.out.println(ovChipkaarten.size() + " OVChipkaarten\n");
+
+    // Koppel de OV-chipkaart aan de reiziger
+    ovChipkaart.setReiziger(reiziger);
+
+    // Test updateOVChipkaart
+    System.out.println("[Test] Test updateOVChipkaart:");
+    ovChipkaart.setKlasse(1);
+    odao.update(ovChipkaart);
+    OVChipkaart gewijzigdeOVChipkaart = odao.getOVChipkaartByKaartnummer(ovChipkaart.getKaartnummer());
+    System.out.println("Na update: " + gewijzigdeOVChipkaart);
+
+    // Test verwijderOVChipkaart
+    System.out.println("\n[Test] Test verwijderOVChipkaart:");
+    odao.delete(ovChipkaart);
+    ovChipkaarten = odao.getAllOVChipkaarten();
+    System.out.println("Na verwijderen van OVChipkaart: " + ovChipkaarten.size() + " OVChipkaarten");
+
+    // Verwijder de testreiziger om de database normaal te maken
+    rdao.verwijderReiziger(reiziger.getReizigerId());
+
+    // Voer de test voor OV-chipkaart koppeling uit
+    testOVChipkaartKoppeling(odao, rdao);
+}
+
+    private static void testOVChipkaartKoppeling(OVChipkaartDAO odao, ReizigerDAO rdao) throws SQLException {
+        System.out.println("\n---------- Test OVChipkaart Koppeling -------------");
 
         // Maak een nieuwe reiziger aan en persisteer deze in de database
         String gbdatum = "1981-03-14";
@@ -191,76 +229,75 @@ public class Main {
         rdao.voegReizigerToe(reiziger);
 
         // Maak een nieuwe OVChipkaart aan en persisteer deze in de database
-        OVChipkaart ovChipkaart = new OVChipkaart(12345, new Date(System.currentTimeMillis()), 2, 25.0, 88);
-        System.out.print("[Test] Eerst " + ovChipkaarten.size() + " OVChipkaarten, na OVChipkaartDAO.save() ");
+        OVChipkaart ovChipkaart = new OVChipkaart(12345, new Date(System.currentTimeMillis()), 2, 25.0, reiziger.getReizigerId());
+        System.out.println("[Test] Aangemaakt OVChipkaart met Reiziger ID: " + reiziger.getReizigerId());
+        //ovChipkaart.setReiziger(reiziger);
+        reiziger.getOvChipkaartList().add(ovChipkaart); // Voeg de OV-chipkaart toe aan de lijst
+
+        System.out.println(reiziger);
+        // Sla de OV-chipkaart op in de database
         odao.save(ovChipkaart);
-        ovChipkaarten = odao.getAllOVChipkaarten();
-        System.out.println(ovChipkaarten.size() + " OVChipkaarten\n");
 
-        // Test updateOVChipkaart
-        System.out.println("[Test] Test updateOVChipkaart:");
-        ovChipkaart.setKlasse(1);
-        odao.update(ovChipkaart);
-        OVChipkaart gewijzigdeOVChipkaart = odao.getOVChipkaartByKaartnummer(ovChipkaart.getKaartnummer());
-        System.out.println("Na update: " + gewijzigdeOVChipkaart);
+        // Haal de OV-chipkaarten op van de reiziger
+        List<OVChipkaart> ovChipkaartenVanReiziger = odao.getOVChipkaartenByReiziger(reiziger);
 
-        // Test verwijderOVChipkaart
-        System.out.println("\n[Test] Test verwijderOVChipkaart:");
-        odao.delete(ovChipkaart);
-        ovChipkaarten = odao.getAllOVChipkaarten();
-        System.out.println("Na verwijderen van OVChipkaart: " + ovChipkaarten.size() + " OVChipkaarten");
-
-        // Verwijder de testreiziger om de database normaal te maken
-        rdao.verwijderReiziger(reiziger.getReizigerId1());
-    }
-    private static void printReizigersAdressenEnOVChipkaarten(Connection connection) throws SQLException {
-        String query = "SELECT r.reiziger_id, r.voorletters, r.tussenvoegsel, r.achternaam, r.geboortedatum, " +
-                "a.adres_id, a.postcode, a.huisnummer, " +
-                "o.kaart_nummer, o.geldig_tot, o.klasse, o.saldo " +
-                "FROM reiziger r " +
-                "LEFT JOIN adres a ON r.reiziger_id = a.reiziger_id " +
-                "LEFT JOIN ov_chipkaart o ON r.reiziger_id = o.reiziger_id";
-
-        PreparedStatement preparedStatement = connection.prepareStatement(query);
-        ResultSet resultSet = preparedStatement.executeQuery();
-
-        System.out.println("\nReizigersAdressenEnOVChipkaarten: \n");
-
-        while (resultSet.next()) {
-            int reizigerId = resultSet.getInt("reiziger_id");
-            String voorletters = resultSet.getString("voorletters");
-            String tussenvoegsel = resultSet.getString("tussenvoegsel");
-            String achternaam = resultSet.getString("achternaam");
-            String geboortedatum = resultSet.getString("geboortedatum");
-
-            int adresId = resultSet.getInt("adres_id");
-            String postcode = resultSet.getString("postcode");
-            String huisnummer = resultSet.getString("huisnummer");
-
-            int kaartNummer = resultSet.getInt("kaart_nummer");
-            Date geldigTot = resultSet.getDate("geldig_tot");
-            int klasse = resultSet.getInt("klasse");
-            double saldo = resultSet.getDouble("saldo");
-
-            System.out.println("Reiziger {#" + reizigerId + " " + formatName(voorletters, tussenvoegsel, achternaam) +
-                    ", geb. " + geboortedatum + "}");
-
-            if (adresId != 0) {
-                System.out.println("Adres {#" + adresId + " " + postcode + "-" + huisnummer + "}");
-            }
-
-            if (kaartNummer != 0) {
-                System.out.println("OVChipkaart {#" + kaartNummer + ", geldig tot " + geldigTot +
-                        ", klasse " + klasse + ", saldo " + saldo + "}");
-            }
-
-            System.out.println();
+        System.out.println("[Test] OVChipkaarten van de reiziger:");
+        for (OVChipkaart ov : ovChipkaartenVanReiziger) {
+            System.out.println(ov);
+            reiziger.getOvChipkaartList().remove(ov); // Verwijder de OV-chipkaart uit de lijst
         }
 
-        resultSet.close();
-        preparedStatement.close();
+        // Verwijder de OV-chipkaarten van de reiziger
+        for (OVChipkaart ov : ovChipkaartenVanReiziger) {
+            odao.deleteOVChipkaart(ov.getKaartnummer());
+        }
+
+        // Verwijder de testreiziger om de database normaal te maken
+        rdao.verwijderReiziger(reiziger.getReizigerId());
     }
 
 
+
+    private static void printReizigersAdressenEnOVChipkaarten(ReizigerDAO reizigerDAO, AdresDAO adresDAO, OVChipkaartDAO ovChipkaartDAO) throws SQLException {
+        List<Reiziger> reizigers = reizigerDAO.getAllReizigers();
+
+        System.out.println("\nReizigers, adressen en OvChipkaarten:\n");
+
+        for (Reiziger reiziger : reizigers) {
+            System.out.println("Reiziger ID: " + reiziger.getReizigerId());
+            System.out.println("Voorletters: " + reiziger.getVoorletters());
+            System.out.println("Tussenvoegsel: " + reiziger.getTussenvoegsel());
+            System.out.println("Achternaam: " + reiziger.getAchternaam());
+            System.out.println("Geboortedatum: " + reiziger.getGeboortedatum());
+            System.out.println();
+
+            // Adressen
+            List<Adres> adressen = adresDAO.findByReiziger(reiziger);
+            if (!adressen.isEmpty()) {
+                System.out.println("Adressen:");
+                for (Adres adres : adressen) {
+                    System.out.println("  Adres ID: " + adres.getAdres_id());
+                    System.out.println("  Postcode: " + adres.getPostcode());
+                    System.out.println("  Huisnummer: " + adres.getHuisnummer());
+                    System.out.println();
+                }
+            }
+
+            // OV-chipkaarten
+            List<OVChipkaart> ovChipkaarten = ovChipkaartDAO.getOVChipkaartenByReiziger(reiziger);
+            if (!ovChipkaarten.isEmpty()) {
+                System.out.println("OV-chipkaarten:");
+                for (OVChipkaart ovChipkaart : ovChipkaarten) {
+                    System.out.println("  Kaartnummer: " + ovChipkaart.getKaartnummer());
+                    System.out.println("  Geldig tot: " + ovChipkaart.getGeldigTot());
+                    System.out.println("  Klasse: " + ovChipkaart.getKlasse());
+                    System.out.println("  Saldo: " + ovChipkaart.getSaldo());
+                    System.out.println();
+                }
+            }
+
+            System.out.println("------------------------------");
+        }
+    }
 
 }

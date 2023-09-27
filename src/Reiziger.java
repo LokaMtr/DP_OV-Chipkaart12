@@ -1,4 +1,6 @@
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Reiziger {
     private int reizigerId;
@@ -9,6 +11,15 @@ public class Reiziger {
 
     private Adres adres;
 
+    public List<OVChipkaart> getOvChipkaartList() {
+        return ovChipkaartList;
+    }
+
+    public void setOvChipkaartList(List<OVChipkaart> ovChipkaartList) {
+        this.ovChipkaartList = ovChipkaartList;
+    }
+
+    private List<OVChipkaart> ovChipkaartList = new ArrayList<>();
     public Adres getAdres() {
         return adres;
     }
@@ -47,13 +58,30 @@ public class Reiziger {
         return geboortedatum;
     }
 
+    public int getReizigerId() {
+        return reizigerId;
+    }
+
+
     // toString()-methode voor een nette weergave van een Reiziger-object
-    @Override
-    public String toString() {
+    public String oldtoString() {
         return "Reiziger ID: " + reizigerId +
                 "\nVoorletters: " + voorletters +
                 "\nTussenvoegsel: " + tussenvoegsel +
                 "\nAchternaam: " + achternaam +
                 "\nGeboortedatum: " + geboortedatum.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "Reiziger{" +
+                "reizigerId=" + reizigerId +
+                ", voorletters='" + voorletters + '\'' +
+                ", tussenvoegsel='" + tussenvoegsel + '\'' +
+                ", achternaam='" + achternaam + '\'' +
+                ", geboortedatum=" + geboortedatum +
+                ", adres=" + adres +
+                ", ovChipkaartList=" + ovChipkaartList +
+                '}';
     }
 }
