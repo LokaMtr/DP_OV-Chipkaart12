@@ -1,4 +1,6 @@
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OVChipkaart {
     private int kaartnummer;
@@ -7,6 +9,7 @@ public class OVChipkaart {
     private double saldo;
     private Reiziger reiziger; // Bidirectionele relatie met Reiziger
     private int reizigerId;
+    private List<Product> products; // Bidirectionele relatie met Product
 
     // Constructor
     public OVChipkaart(int kaartnummer, Date geldigTot, int klasse, double saldo, int reizigerId) {
@@ -15,6 +18,7 @@ public class OVChipkaart {
         this.klasse = klasse;
         this.saldo = saldo;
         this.reizigerId = reizigerId;
+        this.products = new ArrayList<>();
     }
 
     // Getter- en setter-methoden voor de attributen
@@ -59,10 +63,26 @@ public class OVChipkaart {
         this.reiziger = reiziger;
     }
 
-    // toString()-methode voor een nette weergave van een OVChipkaart-object
-//    @Override
-    public String oldtoString() {
-        return "OVChipkaart #" + kaartnummer + " (Geldig tot: " + geldigTot + ", Klasse: " + klasse + ", Saldo: " + saldo + ")";
+    public int getReizigerId() {
+        return reizigerId;
+    }
+
+    public void setReizigerId(int reizigerId) {
+        this.reizigerId = reizigerId;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void addProduct(Product product) {
+        products.add(product);
+        product.getOvChipkaarten().add(this);
+    }
+
+    public void removeProduct(Product product) {
+        products.remove(product);
+        product.getOvChipkaarten().remove(this);
     }
 
     @Override
@@ -76,38 +96,4 @@ public class OVChipkaart {
                 ", reizigerId=" + reizigerId +
                 '}';
     }
-
-    public int getKaartNummer() {
-        return kaartnummer;
-    }
-
-    public int getReizigerId() {
-        return reizigerId;
-    }
-
-    public void setReizigerId(int reizigerId) {
-        this.reizigerId = reizigerId;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

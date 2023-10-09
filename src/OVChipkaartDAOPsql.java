@@ -136,7 +136,7 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
         String query = "INSERT INTO ov_chipkaart (kaart_nummer, geldig_tot, klasse, saldo, reiziger_id) " +
                 "VALUES (?, ?, ?, ?, ?)";
         PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setInt(1, ovChipkaart.getKaartNummer());
+        preparedStatement.setInt(1, ovChipkaart.getKaartnummer());
         preparedStatement.setDate(2, ovChipkaart.getGeldigTot());
         preparedStatement.setInt(3, ovChipkaart.getKlasse());
         preparedStatement.setDouble(4, ovChipkaart.getSaldo());
@@ -206,7 +206,7 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
         preparedStatement.setInt(2, ovChipkaart.getKlasse());
         preparedStatement.setDouble(3, ovChipkaart.getSaldo());
         preparedStatement.setInt(4, ovChipkaart.getReizigerId());
-        preparedStatement.setInt(5, ovChipkaart.getKaartNummer());
+        preparedStatement.setInt(5, ovChipkaart.getKaartnummer());
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
@@ -216,7 +216,7 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
     public void delete(OVChipkaart ovChipkaart) throws SQLException {
         String query = "DELETE FROM ov_chipkaart WHERE kaart_nummer = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setInt(1, ovChipkaart.getKaartNummer());
+        preparedStatement.setInt(1, ovChipkaart.getKaartnummer());
 
         preparedStatement.executeUpdate();
         preparedStatement.close();

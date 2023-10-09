@@ -41,6 +41,10 @@ public class Main {
 //        printReizigersEnAdressen(connection);
         printReizigersAdressenEnOVChipkaarten(reizigerDAO, adao, odao);
 
+        ProductDAO productDAO = new ProductDAOPsql(connection);
+        testProductCRUD(productDAO, odao);
+
+
         resultSet.close();
         preparedStatement.close();
         connection.close();
@@ -147,33 +151,6 @@ public class Main {
     }
 
 
-//    private static void printReizigersEnAdressen(Connection connection) throws SQLException {
-//        String query = "SELECT r.reiziger_id, r.voorletters, r.tussenvoegsel, r.achternaam, r.geboortedatum, a.adres_id, a.postcode, a.huisnummer " +
-//                "FROM reiziger r " +
-//                "LEFT JOIN adres a ON r.reiziger_id = a.reiziger_id";
-//
-//        PreparedStatement preparedStatement = connection.prepareStatement(query);
-//        ResultSet resultSet = preparedStatement.executeQuery();
-//
-//        while (resultSet.next()) {
-//            int reizigerId = resultSet.getInt("reiziger_id");
-//            String voorletters = resultSet.getString("voorletters");
-//            String tussenvoegsel = resultSet.getString("tussenvoegsel");
-//            String achternaam = resultSet.getString("achternaam");
-//            String geboortedatum = resultSet.getString("geboortedatum");
-//
-//            int adresId = resultSet.getInt("adres_id");
-//            String postcode = resultSet.getString("postcode");
-//            String huisnummer = resultSet.getString("huisnummer");
-//
-//            System.out.println("Reiziger {#" + reizigerId + " " + formatName(voorletters, tussenvoegsel, achternaam) + ", geb. " + geboortedatum + ", Adres {#" + adresId + " " + postcode + "-" + huisnummer + "}}");
-//        }
-//
-//        resultSet.close();
-//        preparedStatement.close();
-//    }
-//
-    // Test alle CRUD-operaties voor OVChipkaart
 private static void testOVChipkaartDAO(OVChipkaartDAO odao, ReizigerDAO rdao) throws SQLException {
     System.out.println("\n---------- Test OVChipkaartDAO -------------");
 
@@ -187,7 +164,7 @@ private static void testOVChipkaartDAO(OVChipkaartDAO odao, ReizigerDAO rdao) th
 
     // Maak een nieuwe reiziger aan en persisteer deze in de database
     String gbdatum = "1981-03-14";
-    Reiziger reiziger = new Reiziger(88, "S", "", "Boers", java.sql.Date.valueOf(gbdatum));
+    Reiziger reiziger = new Reiziger(777, "S", "", "Boers", java.sql.Date.valueOf(gbdatum));
     rdao.voegReizigerToe(reiziger);
 
     // Maak een nieuwe OVChipkaart aan en persisteer deze in de database
@@ -225,7 +202,7 @@ private static void testOVChipkaartDAO(OVChipkaartDAO odao, ReizigerDAO rdao) th
 
         // Maak een nieuwe reiziger aan en persisteer deze in de database
         String gbdatum = "1981-03-14";
-        Reiziger reiziger = new Reiziger(88, "S", "", "Boers", java.sql.Date.valueOf(gbdatum));
+        Reiziger reiziger = new Reiziger(777, "S", "", "Boers", java.sql.Date.valueOf(gbdatum));
         rdao.voegReizigerToe(reiziger);
 
         // Maak een nieuwe OVChipkaart aan en persisteer deze in de database
@@ -299,5 +276,70 @@ private static void testOVChipkaartDAO(OVChipkaartDAO odao, ReizigerDAO rdao) th
             System.out.println("------------------------------");
         }
     }
+
+    private static void testProductCRUD(ProductDAO productDAO, OVChipkaartDAO ovChipkaartDAO) throws SQLException {
+        System.out.println("\n---------- Test ProductDAO CRUD -------------");
+
+        // Create
+        System.out.println("[Test] Create Product:");
+        Product product = new Product(7, "TestProduct", "Dit is een testproduct", 10.0);
+        productDAO.save(product);
+        System.out.println(product);
+
+        // Read
+        System.out.println("[Test] Read Product:");
+        Product gelezenProduct = productDAO.findByProductNummer(product.getProductNummer());
+        System.out.println(gelezenProduct);
+
+        // Update
+        System.out.println("[Test] Update Product:");
+        gelezenProduct.setNaam("Aangepast Product");
+        gelezenProduct.setBeschrijving("Dit is een aangepast product");
+        gelezenProduct.setPrijs(15.0);
+        productDAO.update(gelezenProduct);
+        System.out.println(gelezenProduct);
+
+
+        // Maak een nieuwe OVChipkaart en persisteer deze in de database
+        OVChipkaart ovChipkaart = new OVChipkaart(77777, new Date(System.currentTimeMillis()), 2, 25.0, 1);
+        ovChipkaartDAO.save(ovChipkaart);
+
+        // Voeg het product toe aan de OVChipkaart en persisteer het in de database
+        System.out.println("[Test] Voeg product toe aan OVChipkaart:");
+        ovChipkaart.addProduct(product);
+        ovChipkaartDAO.update(ovChipkaart);
+        System.out.println(product);
+
+        // Haal alle producten op die aan de OVChipkaart zijn gekoppeld
+        System.out.println("[Test] Producten van de OVChipkaart:");
+        List<Product> productenVanOVChipkaart = productDAO.findByOVChipkaart(ovChipkaart);
+        for (Product p : productenVanOVChipkaart) {
+            System.out.println(p);
+        }
+
+        // Verwijder het product van de OVChipkaart en uit de database
+        System.out.println("[Test] Verwijder product van OVChipkaart:");
+        ovChipkaart.removeProduct(product);
+        ovChipkaartDAO.update(ovChipkaart);
+        Product productToDelete = productDAO.findByProductNummer(7);
+        productDAO.delete(productToDelete);
+        System.out.println("Product is verwijderd van OVChipkaart.");
+
+        // Delete
+        System.out.println("[Test] Delete Product:");
+        productDAO.delete(productToDelete);
+        Product verwijderdProduct = productDAO.findByProductNummer(gelezenProduct.getProductNummer());
+        if (verwijderdProduct == null) {
+            System.out.println("Product is verwijderd.");
+        } else {
+            System.out.println("Product is niet verwijderd.");
+        }
+
+        // Verwijder de OVChipkaart om de database normaal te maken
+        System.out.println("[Test] Verwijder OVChipkaart:");
+        ovChipkaartDAO.delete(ovChipkaart);
+        System.out.println("OVChipkaart is verwijderd.");
+    }
+
 
 }
